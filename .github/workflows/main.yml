@@ -41,7 +41,8 @@ jobs:
 
       # 步骤4: 使用Maven进行构建和打包
       - name: Build with Maven
-        run: mvn -B package --file pom.xml -DskipTests
+        working-directory: ./backend
+        run: mvn -B package -DskipTests
 
       # 步骤5: 登录到Docker Hub
       - name: Log in to Docker Hub
@@ -86,7 +87,9 @@ jobs:
           script: |
             # 从环境变量中获取镜像名称和最新标签
             # 这里的标签是Git Commit的短哈希值，确保部署的是本次构建的镜像
-            export IMAGE_TO_DEPLOY=${{ env.IMAGE_NAME }}:${{ github.sha }}
+            # export IMAGE_TO_DEPLOY=${{ env.IMAGE_NAME }}:${{ github.sha }}
+            export IMAGE_TAG=$(echo ${{ github.sha }} | cut -c1-7)
+            export IMAGE_TO_DEPLOY="${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
             
             # 执行服务器上的部署脚本，并传入要部署的镜像名称
             bash /home/ubuntu/deploy.sh $IMAGE_TO_DEPLOY
